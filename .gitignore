@@ -1,0 +1,16 @@
+# Ignorar carpeta de compilación
+build/
+bin/
+
+# Ignorar archivos de sistema y VSCode
+.vscode/
+.DS_Store
+
+# Ignorar archivos temporales de Python
+__pycache__/
+*.pyc
+
+# Ignorar ejecutables compilados
+*.exe
+*.out
+obc_main
