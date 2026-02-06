@@ -12,9 +12,6 @@ int main() {
 
         scheduler_start_cycle();
 
-        // B. --- AQUÍ IRÍA EL TRABAJO ÚTIL (Sensores, Control, etc.) ---
-        
-        // Para probar, imprimimos info cada 10 ciclos (aprox 1 segundo)
         if (cycle_counter % 10 == 0) {
             uint32_t uptime = scheduler_get_uptime_ms();
             printf("[MAIN] Tick: %d | Uptime: %u ms | Estado: OK\n", cycle_counter, uptime);
