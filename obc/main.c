@@ -20,7 +20,7 @@ int main() {
             Attitude data = attitude_get();
 
             uint32_t uptime = scheduler_get_uptime_ms();
-            printf("[MAIN] Tick: %d | Uptime: %u ms | Pos X: %.2f m\n", cycle_counter, uptime, data.position.x);
+            printf("[MAIN] Tick: %d | Uptime: %u ms | Pos X: %.2f m | Velocity rottation Z: %.2f rad/s\n", cycle_counter, uptime, data.position.x, data.angular_velocity.z);
         }
         
         cycle_counter++;
