@@ -4,7 +4,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "core/scheduler.h"
+#include "scheduler.h"
 
 #define life_cycle_ms 100
 
