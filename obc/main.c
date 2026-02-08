@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "core/scheduler.h"
 #include "gnc/attitude.h"
+#include "comms/commands.h"
 
 int main() {
     scheduler_init();
@@ -14,6 +15,17 @@ int main() {
 
         scheduler_start_cycle();
         attitude_update();
+
+        if (cycle_counter == 50) {
+            printf("[TIERRA] Enviando comando PING...\n");
+            comms_process_command(CMD_PING);
+        }
+
+
+        if (cycle_counter == 100) {
+            printf("[TIERRA] Enviando comando REBOOT...\n");
+            comms_process_command(CMD_REBOOT);
+        }
 
         if (cycle_counter % 10 == 0) {
 
