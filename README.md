@@ -90,7 +90,7 @@ graph TD;
 ## 🛠️ Project Roadmap
 
 - [x] **Phase 1:** Core Architecture & Build System (CMake).
-- [ ] **Phase 2:** Scheduler implementation (10Hz deterministic loop).
+- [x] **Phase 2:** Scheduler implementation (10Hz deterministic loop).
 - [ ] **Phase 3:** Comms Interface (Socket-based TM/TC).
 - [ ] **Phase 4:** GNC - B-Dot Controller (Detumbling).
 - [ ] **Phase 5:** GNC - Attitude Determination (MEKF).
