@@ -4,6 +4,7 @@
 #include "core/power.h"
 #include "gnc/attitude.h"
 #include "comms/commands.h"
+#include "core/storage.h"
 
 int main() {
 
@@ -12,6 +13,13 @@ int main() {
     scheduler_init();
     attitude_init();
     power_init();
+
+    bool storage_ok = storage_init();
+
+    if (!storage_ok) {
+        printf("[MAIN] WARNING: Commencing flight in degraded mode (no data logging).\n");
+    }
+
     printf("[MAIN] Started sistem \n");
 
     uint32_t cycle_counter = 0;
@@ -23,9 +31,12 @@ int main() {
 
         battery_voltage = power_get_battery_voltage();
 
+        storage_log_data(scheduler_get_uptime_ms(), battery_voltage, attitude_get().position, attitude_get().velocity);
+
         if (battery_voltage <= 0) {
 
             printf("[CRITICAL] BATTERY DEPLETED - SYSTEM SHUTDOWN IMMINENT\n");
+            storage_close();
             return 1;
 
         }else if (battery_voltage < 3.5) {
@@ -41,10 +52,10 @@ int main() {
             }
 
 
-            if (cycle_counter == 100) {
-                printf("[EARTH] Sending REBOOT command...\n");
-                comms_process_command(CMD_REBOOT);
-            }
+            //if (cycle_counter == 100) {
+            //    printf("[EARTH] Sending REBOOT command...\n");
+            //    comms_process_command(CMD_REBOOT);
+            //}
 
         }
 
