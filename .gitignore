@@ -9,8 +9,12 @@ bin/
 # Ignorar archivos temporales de Python
 __pycache__/
 *.pyc
+./venv/
 
 # Ignorar ejecutables compilados
 *.exe
 *.out
 obc_main
+
+# Datos generados (opcional, pero recomendado)
+logs/flight_data.csv

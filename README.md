@@ -9,52 +9,45 @@
 
 This project is a high-fidelity implementation of a **CubeSat On-Board Computer (OBC)** flight software, designed to mimic the constraints and architecture of real space missions. 
 
-Unlike standard simulations, this system decouples the **flight software** (firmware) from the **environment simulation** (physics), allowing for a **Virtual Hardware-in-the-Loop (vHIL)** testing approach. The OBC runs deterministically, agnostic of whether it is communicating with a physics engine or real hardware sensors.
+Unlike standard simulations, this system utilizes a **Software-in-the-Loop (SIL)** and **Virtual Hardware-in-the-Loop (vHIL)** testing approach. The OBC runs deterministically, agnostic of whether it is communicating with a physics engine or real hardware sensors.
 
 ### 🎯 Core Objectives
 - Implementation of a **deterministic scheduler** for soft-real-time task execution.
-- Development of **GNC/ADCS algorithms** (Attitude Determination and Control System).
-- **Fault Detection, Isolation, and Recovery (FDIR)** mechanisms.
-- Full **Telemetry and Telecommand (TM/TC)** pipeline via TCP sockets (simulating radio links).
+- Development of **GNC/ADCS algorithms** (Attitude Determination and Control System) for satellite detumbling.
+- **Fault Detection, Isolation, and Recovery (FDIR)** mechanisms (e.g., Safe Mode transition on critical battery levels).
+- **Telemetry logging and post-flight analytics** via a custom Ground Station.
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ System Architecture & File Structure
 
-The system is distributed into three independent modules communicating over local network sockets, simulating the interfaces between hardware components.
+The project is structured following aerospace industry standards to ensure separation of concerns between raw telemetry, processed reports, documentation, and source code.
 
-```mermaid
-graph TD;
-    A[Physics Simulator] -- Sensor Data (I2C/SPI sim) --> B(OBC Firmware);
-    B -- Actuator Cmds (PWM sim) --> A;
-    B -- Telemetry (Downlink) --> C[Ground Station];
-    C -- Commands (Uplink) --> B;
+```text
+cubesat-flight-software/
+├── obc/               # C99 Flight Software (Core, GNC, Comms, Storage)
+├── ground_station/    # Python tools for post-flight telemetry analysis
+├── logs/              # Raw data outputs (CSV blackbox files)
+├── reports/           # Processed analytical outputs (PNG graphs)
+├── docs/              # Static documentation (ICDs, Architecture, Manuals)
+└── build/             # CMake compiled binaries
+```
 
- ```
-    
 ### 1. OBC (On-Board Computer) 🧠
 * **Language:** C (C99 standard).
-* **Role:** The "brain" of the satellite. It runs the flight logic.
+* **Role:** The "brain" of the satellite.
 * **Key Features:**
-    * Cyclic execution (10Hz control loop).
-    * Mode management (Safe, Detumble, Nominal).
-    * Sensor fusion (Kalman Filter implementation planned).
+    * Cyclic execution (10Hz deterministic control loop).
+    * Storage Module: Blackbox telemetry logging to CSV.
+    * Power & FDIR: Graceful degradation and Safe Mode upon battery depletion.
+    * GNC: PID control algorithms for angular velocity stabilization (Detumbling).
 
-### 2. Physics Simulator 🌌
-* **Language:** Python.
-* **Role:** Simulates the orbital environment and hardware interfaces.
+### 2. Ground Station (Data Analytics) 📡
+* **Language:** Python (`pandas`, `matplotlib`).
+* **Role:** Mission control post-flight interface.
 * **Key Features:**
-    * Orbital mechanics & magnetic field modeling.
-    * Sensor noise injection (Gyro/Mag).
-    * Rotational dynamics integration.
-
-### 3. Ground Station 📡
-* **Language:** Python (GUI).
-* **Role:** Mission control interface.
-* **Key Features:**
-    * Real-time 3D attitude visualization.
-    * Telecommand dispatching.
-    * Health & Status monitoring.
+    * Automated parsing of flight software logs.
+    * High-resolution report generation for Power Systems and GNC performance.
 
 ---
 
@@ -63,44 +56,63 @@ graph TD;
 ### Prerequisites
 * **OS:** Linux or Windows (via WSL2 - Ubuntu recommended).
 * **Compiler:** GCC / CMake (3.10+).
-* **Python:** 3.8+ (for Simulation & Ground Station).
+* **Python:** 3.12+ (with `venv` module).
 
-### Build & Run
+### Build & Run Instructions
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/carlos888nasa/cubesat-flight-software.git](https://github.com/carlos888nasa/cubesat-flight-software.git)
-    cd cubesat-flight-software
-    ```
+**1. Clone the repository:**
+```bash
+git clone https://github.com/carlos888nasa/cubesat-flight-software.git
+cd cubesat-flight-software
+```
 
-2.  **Build the Flight Software (OBC):**
-    ```bash
-    mkdir build && cd build
-    cmake ..
-    make
-    ```
+2. Build the Flight Software (OBC):
+```bash
+mkdir build && cd build
+cmake ..
+make
+```
 
-3.  **Run the System (In separate terminals):**
-    * *Terminal 1 (Simulator):* `python3 simulator/main.py`
-    * *Terminal 2 (OBC):* `./obc_main`
-    * *Terminal 3 (Ground Station):* `python3 ground_station/main.py`
+3. Execute a Flight Simulation:
+```bash
+# Still inside the build/ directory
+./OBC
+```
+(This will run the flight sequence and generate a `flight_data.csv` in the `logs/` directory).
 
----
+4. Generate Ground Station Reports:
+Return to the project root and set up the Python environment to analyze the telemetry:
 
-## 🛠️ Project Roadmap
+```bash
+cd ..
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 
-- [x] **Phase 1:** Core Architecture & Build System (CMake).
-- [x] **Phase 2:** Scheduler implementation (10Hz deterministic loop).
-- [ ] **Phase 3:** Comms Interface (Socket-based TM/TC).
-- [ ] **Phase 4:** GNC - B-Dot Controller (Detumbling).
-- [ ] **Phase 5:** GNC - Attitude Determination (MEKF).
-- [ ] **Phase 6:** Fault Injection & Recovery testing.
+# Run the Ground Station parser
+python ground_station/main.py
+```
+(Check the `reports/` folder for the generated telemetry graphs).
 
----
+🛠️ Project Roadmap
+[x] Phase 1: Core Architecture & Build System (CMake).
 
-## 👨‍💻 Author
+[x] Phase 2: Scheduler implementation (10Hz deterministic loop).
 
-**Carlos** - *Aerospace Enthusiast & Embedded Developer*
-[GitHub Profile](https://github.com/carlos888nasa)
+[x] Phase 3: Storage Module (CSV Blackbox Telemetry Logging).
 
-*This project is developed for educational and portfolio purposes, demonstrating full-cycle embedded software development for aerospace applications.*
+[x] Phase 4: Power Management & FDIR Logic (Safe Mode).
+
+[x] Phase 5: GNC - Controller implementation (Detumbling/PID).
+
+[x] Phase 6: Ground Station Post-Flight Analytics (Python).
+
+[ ] Phase 7: Comms Interface (Socket-based TM/TC uplink/downlink).
+
+[ ] Phase 8: Hardware Abstraction Layer (HAL) for real Microcontroller Porting (ESP32/FreeRTOS).
+
+👨‍💻 Author
+Carlos - Aerospace Enthusiast & Embedded Developer
+GitHub Profile
+
+This project is developed for educational and portfolio purposes, demonstrating full-cycle embedded software development for aerospace applications.
