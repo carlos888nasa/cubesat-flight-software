@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+from scipy.spatial.transform import Rotation as R 
 
 def plot_battery_voltage_over_time(log_file_path):
     if not os.path.exists(log_file_path):
@@ -11,11 +12,23 @@ def plot_battery_voltage_over_time(log_file_path):
     print(f"[GROUND STATION] Loading telemetry from {log_file_path}...")
     data = pd.read_csv(log_file_path)
 
+    data.columns = data.columns.str.strip()
+
     time = data['Time_ms']
     voltage = data['Voltage_V']
+
+    vel_x = data['Vel_X']
+    vel_y = data['Vel_Y']
     vel_z = data['Vel_Z']
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    quats = data[['Quat_X', 'Quat_Y', 'Quat_Z', 'Quat_W']].values
+
+    euler_angles = R.from_quat(quats).as_euler('xyz', degrees=True)
+    roll = euler_angles[:, 0]
+    pitch = euler_angles[:, 1]
+    yaw = euler_angles[:, 2]
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
 
     ax1.plot(time, voltage, label='Voltage (V)', color='blue', linewidth=2)
     ax1.axhline(3.5, color='red', linestyle='--', label='Safe Mode Threshold (3.5V)')
@@ -25,11 +38,20 @@ def plot_battery_voltage_over_time(log_file_path):
     ax1.grid(True)
     ax1.legend()
 
-    ax2.plot(time, vel_z, label='Angular Velocity (rad/s)', color='green', linewidth=2)
-    ax2.set_xlabel('Time (ms)')
+    ax2.plot(time, vel_x, label='Vel X (rad/s)', color='orange', alpha=0.8)
+    ax2.plot(time, vel_y, label='Vel Y (rad/s)', color='purple', alpha=0.8)
+    ax2.plot(time, vel_z, label='Vel Z (rad/s)', color='green', linewidth=2)
     ax2.set_ylabel('Angular Velocity (rad/s)')
     ax2.grid(True)
     ax2.legend()
+
+    ax3.plot(time, roll, label='Roll (X)', color='red')
+    ax3.plot(time, pitch, label='Pitch (Y)', color='green')
+    ax3.plot(time, yaw, label='Yaw (Z)', color='blue')
+    ax3.set_xlabel('Time (ms)')
+    ax3.set_ylabel('Angle (Degrees)')
+    ax3.grid(True)
+    ax3.legend()
 
     plt.tight_layout()
 

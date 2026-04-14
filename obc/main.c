@@ -31,7 +31,7 @@ int main() {
 
         battery_voltage = power_get_battery_voltage();
 
-        storage_log_data(scheduler_get_uptime_ms(), battery_voltage, attitude_get().position, attitude_get().velocity);
+        storage_log_data(scheduler_get_uptime_ms(), battery_voltage, attitude_get().position, attitude_get().velocity, attitude_get().orientation);
 
         if (battery_voltage <= 0) {
 

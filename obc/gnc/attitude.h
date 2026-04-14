@@ -7,8 +7,8 @@
 typedef struct {
     Vec3 position;
     Vec3 velocity;
-    Vec3 orientation; // Euler angles: roll, pitch, yaw
-    Vec3 angular_velocity; // Roll, pitch, yaw rates
+    Quaternion orientation; 
+    Vec3 angular_velocity; 
 } Attitude;
 
 void attitude_init();

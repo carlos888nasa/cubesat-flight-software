@@ -6,10 +6,11 @@
 
 static Attitude current_attitude;
 
+
 void attitude_init() {
     current_attitude.position = (Vec3){0.0f, 0.0f, 0.0f};
     current_attitude.velocity = (Vec3){5.0f, 0.0f, 0.0f};
-    current_attitude.orientation = (Vec3){0.0f, 0.0f, 0.0f}; 
+    current_attitude.orientation = quat_identity(); 
     current_attitude.angular_velocity = (Vec3){0.0f, 0.0f, 0.5f};
 }
 
@@ -25,8 +26,16 @@ void attitude_update() {
     Vec3 delta_velocity = vec3_scale(current_attitude.angular_velocity, -Kp);
     delta_velocity = vec3_scale(delta_velocity, ATTITUDE_UPDATE_INTERVAL_s);
     current_attitude.angular_velocity = vec3_add(current_attitude.angular_velocity, delta_velocity);
-    current_attitude.angular_velocity = vec3_scale(current_attitude.angular_velocity, ATTITUDE_UPDATE_INTERVAL_s);
-    current_attitude.orientation = vec3_add(current_attitude.orientation, current_attitude.angular_velocity);
+
+    float speed_rads = vec3_length(current_attitude.angular_velocity);
+    
+    if(speed_rads > 0.00001f){
+        float angle_turned = speed_rads*ATTITUDE_UPDATE_INTERVAL_s;
+        Vec3 axis = vec3_normalize(current_attitude.angular_velocity);
+        Quaternion delta_q = quat_from_axis_angle(axis.x, axis.y, axis.z, angle_turned);
+        current_attitude.orientation = quat_multiply(current_attitude.orientation, delta_q);
+        current_attitude.orientation = quat_normalize(current_attitude.orientation);
+    }
 }  
 
 Attitude attitude_get() {

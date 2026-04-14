@@ -6,7 +6,7 @@
 #include "utils/math_utils.h"
 
 bool storage_init();
-void storage_log_data(uint32_t time_ms, float voltage, Vec3 position, Vec3 velocity);
+void storage_log_data(uint32_t time_ms, float voltage, Vec3 position, Vec3 velocity, Quaternion orientation);
 void storage_close();
 
 #endif
