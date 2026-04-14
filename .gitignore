@@ -9,7 +9,7 @@ bin/
 # Ignorar archivos temporales de Python
 __pycache__/
 *.pyc
-./venv
+.venv
 
 # Ignorar ejecutables compilados
 *.exe
